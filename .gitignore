@@ -1,0 +1,45 @@
+# ==============================================================================
+# AI-Based College Resource Finder — Repository .gitignore
+# ==============================================================================
+
+# ---- Build Artifacts ----
+target/
+**/target/
+*.jar
+*.war
+*.class
+
+# ---- IDE & Editor Files ----
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.code-workspace
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache/
+
+# ---- Secrets, Credentials & Local Environment Files ----
+*.env
+.env
+.env.local
+application-local.yml
+application-prod.yml
+
+# ---- Storage (Ignore all uploaded files; keep folder structure via .gitkeep) ----
+storage/*
+!storage/.gitkeep
+target-storage/
+
+# ---- OS & System Files ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+*.log
+logs/
+backend/*.log

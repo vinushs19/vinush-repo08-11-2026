@@ -1,0 +1,52 @@
+# ==============================================================================
+# Test Profile Configuration (In-Memory H2 Database)
+# Flyway is disabled; Hibernate DDL handles in-memory schema.
+# ==============================================================================
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: false
+        name: JSESSIONID
+
+spring:
+  application:
+    name: college-resource-finder-test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  flyway:
+    enabled: false
+
+app:
+  storage:
+    upload-dir: ./target/test-storage
+    allowed-extensions: pdf,docx,pptx,txt,xlsx,csv
+    max-file-size-mb: 50
+  ai:
+    enabled: true
+    service-url: http://127.0.0.1:8000
+    timeout-ms: 1000
+    max-input-chars: 50000
+    rate-limit-per-minute: 100
+    prefer-local: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+logging:
+  level:
+    root: WARN
+    com.college.resourcefinder: DEBUG

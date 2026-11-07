@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Based College Resource Finder — Foundation</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPWKapLI5e0A5eLmVkLf0jm0RMEZ9z"
+          crossorigin="anonymous">
+    <!-- Custom Application CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <span style="font-size: 1.4rem;">🎓</span>
+                <span>AI-Based College Resource Finder</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/master-data.html">Academic Master Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resources.html">Academic Resources</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/search.html">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/attendance.html">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin.html">Admin</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#status-section">System Status</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/actuator/health" target="_blank">Actuator</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/v1/health" target="_blank">API Health</a>
+                    </li>
+                </ul>
+                <div class="ms-lg-3 my-2 my-lg-0" id="navAuthContainer">
+                    <a href="/login.html" class="btn btn-primary btn-sm px-3">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <header class="hero-banner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="mb-3">
+                        <span id="systemHealthBadge" class="badge bg-secondary badge-live">
+                            <span class="pulse-dot"></span> Checking Status...
+                        </span>
+                        <span class="badge bg-light text-dark ms-2" style="border-radius: 20px;">Module 01: Foundation</span>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">AI-Based College Resource Finder</h1>
+                    <p class="lead mb-4 text-light opacity-90">
+                        A robust, enterprise-grade academic repository platform built on Spring Boot 3.x,
+                        Java 21, and MySQL 8.x. Providing high-performance search, secure file management,
+                        and subject-wise attendance tracking.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="#status-section" class="btn btn-light btn-lg px-4 fw-semibold text-primary">
+                            Verify Environment
+                        </a>
+                        <button id="btnRefreshStatus" class="btn btn-outline-light btn-lg px-4">
+                            Refresh Health
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-4 d-none d-lg-block text-center">
+                    <div style="font-size: 8rem; opacity: 0.85;">📚</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container my-5">
+        
+        <!-- Architecture Modules Overview -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-4">
+                <h2 class="fw-bold">Platform Architecture Modules</h2>
+                <p class="text-muted">Structured in strict dependency order: Core Infrastructure first, AI/NLP last.</p>
+            </div>
+
+            <!-- Card 1: Core Foundation -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">⚙️</div>
+                    <h5 class="fw-bold">01. Foundation</h5>
+                    <p class="text-muted small">
+                        Spring Boot 3.x, Flyway versioned migrations, Actuator endpoints, and YAML configuration.
+                    </p>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active / Verified</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Security & Master Data -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h5 class="fw-bold">02. Auth & Roles</h5>
+                    <p class="text-muted small">
+                        Role-Based Access Control for Student, Faculty, and Admin roles with BCrypt hashing.
+                    </p>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Module 02 Planned</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Academic Repository -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h5 class="fw-bold">03-05. Repository</h5>
+                    <p class="text-muted small">
+                        Courseware cataloging, sanitized UUID storage, MIME-type verification, and download streaming.
+                    </p>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Modules 03-05 Planned</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Attendance & Workflows -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h5 class="fw-bold">06-11. Operations</h5>
+                    <p class="text-muted small">
+                        Subject attendance calculation, controlled file archiving, search history, and audit logging.
+                    </p>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Modules 06-11 Planned</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status & Environment Verification -->
+        <section id="status-section" class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="status-box h-100">
+                    <h4 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
+                        <span>Environment Diagnostics</span>
+                        <span class="badge bg-primary">Localhost</span>
+                    </h4>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Application Layer:</span>
+                            <span id="appStatusText" class="fw-bold">Checking...</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Actuator Health Status:</span>
+                            <span id="actuatorStatusText" class="fw-bold">Checking...</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Application Version:</span>
+                            <span id="appVersionText" class="fw-bold">1.0.0-SNAPSHOT</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Runtime Platform:</span>
+                            <span class="fw-bold">Java 21 LTS (Oracle HotSpot)</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Database Engine:</span>
+                            <span class="fw-bold">MySQL 8.x + Flyway</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">File Storage Root:</span>
+                            <span class="fw-bold">./storage (Controlled)</span>
+                        </li>
+                    </ul>
+                    <div class="alert alert-info py-2 small mb-0">
+                        ℹ️ Full system design specification available under <code>docs/architecture_spec.md</code>.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Endpoint Payload Output -->
+            <div class="col-lg-6 mb-4">
+                <div class="status-box h-100">
+                    <h4 class="fw-bold mb-3">Health API Response (<code>/api/v1/health</code>)</h4>
+                    <p class="text-muted small mb-2">Live serialized JSON response received from the Spring Boot backend:</p>
+                    <div id="healthRawOutput" class="terminal-window">Loading health status from server...</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-1 fw-semibold text-light">AI-Based College Resource Finder</p>
+            <p class="small mb-1">
+                Master of Computer Applications Mini-Project &bull; Hindusthan College of Arts &amp; Science (Autonomous), Coimbatore
+            </p>
+            <p class="small text-muted mb-0">
+                Author: <strong>Vinush S</strong> (Reg No: 26MCA091) &bull; Guide: Mrs. V. Latha Sivasankari
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+    <!-- Custom Application JS -->
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration & Reporting — AI-Based College Resource Finder</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPWKapLI5e0A5eLmVkLf0jm0RMEZ9z"
+          crossorigin="anonymous">
+    <!-- Custom Application CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .metric-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .metric-icon {
+            font-size: 2.2rem;
+            opacity: 0.85;
+        }
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            color: #475569;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 0.75rem 1.25rem;
+        }
+        .nav-tabs .nav-link.active {
+            color: #2563eb;
+            background: transparent;
+            border-bottom: 3px solid #2563eb;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/index.html">
+                <span style="font-size: 1.4rem;">🎓</span>
+                <span>AI-Based College Resource Finder</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/master-data.html">Academic Master Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resources.html">Academic Resources</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/search.html">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/attendance.html">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin.html">Admin Dashboard</a>
+                    </li>
+                </ul>
+                <div class="ms-lg-3 my-2 my-lg-0" id="navAuthContainer">
+                    <span class="text-white small">Checking credentials...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div class="container py-4">
+
+        <!-- Unauthorized Notice -->
+        <div id="unauthorizedNotice" class="alert alert-danger shadow-sm my-5 text-center" style="display: none;">
+            <h4 class="alert-heading fw-bold mb-2">Access Restricted</h4>
+            <p class="mb-3">This dashboard is accessible strictly to system administrators with the <code>ROLE_ADMIN</code> authority.</p>
+            <a href="/index.html" class="btn btn-outline-danger btn-sm">Return to Home</a>
+        </div>
+
+        <!-- Admin Content Area -->
+        <div id="adminContentArea" style="display: none;">
+
+            <!-- Header -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 class="fw-bold mb-1">Administrator Dashboard & Governance</h2>
+                    <p class="text-muted small mb-0">System metrics, real-time database reports, user account administration, and security audit logs.</p>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <button class="btn btn-outline-secondary btn-sm" id="btnRefreshAll">
+                        <span>🔄 Refresh Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Global Alert Container -->
+            <div id="adminAlertContainer"></div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-4" id="adminTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overviewPane" type="button" role="tab">
+                        📊 System Overview & Metrics
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#usersPane" type="button" role="tab">
+                        👥 User Governance
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#auditPane" type="button" role="tab">
+                        🛡️ Security & Audit Logs
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="adminTabContent">
+
+                <!-- TAB 1: OVERVIEW & REPORTS -->
+                <div class="tab-pane fade show active" id="overviewPane" role="tabpanel">
+
+                    <!-- Metric KPI Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Total Accounts</div>
+                                        <div class="metric-value" id="kpiTotalUsers">-</div>
+                                        <div class="text-muted small" id="kpiUserBreakdown">Students: - | Faculty: - | Admin: -</div>
+                                    </div>
+                                    <div class="metric-icon text-primary">👥</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Active Resources</div>
+                                        <div class="metric-value text-success" id="kpiActiveResources">-</div>
+                                        <div class="text-muted small" id="kpiTotalResources">Total in repository: -</div>
+                                    </div>
+                                    <div class="metric-icon text-success">📚</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Storage Consumed</div>
+                                        <div class="metric-value text-info" id="kpiStorageUsed">-</div>
+                                        <div class="text-muted small">Validated uploads (PDF/DOCX)</div>
+                                    </div>
+                                    <div class="metric-icon text-info">💾</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Search Operations</div>
+                                        <div class="metric-value text-warning" id="kpiSearchQueries">-</div>
+                                        <div class="text-muted small">Logged query histories</div>
+                                    </div>
+                                    <div class="metric-icon text-warning">🔍</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Attendance Records</div>
+                                        <div class="metric-value text-secondary" id="kpiAttendanceRecords">-</div>
+                                        <div class="text-muted small">Imported staff sessions</div>
+                                    </div>
+                                    <div class="metric-icon text-secondary">📋</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card metric-card p-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small text-uppercase fw-semibold">Organized Files</div>
+                                        <div class="metric-value text-dark" id="kpiFileOperations">-</div>
+                                        <div class="text-muted small">Controlled save operations</div>
+                                    </div>
+                                    <div class="metric-icon text-dark">📁</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department & Category Breakdown Tables -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm rounded-3 h-100">
+                                <div class="card-header bg-white py-3 border-0">
+                                    <h5 class="fw-bold mb-0">Departmental Resource Distribution</h5>
+                                    <small class="text-muted">Breakdown of resources and physical storage usage by department.</small>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Code</th>
+                                                    <th>Department Name</th>
+                                                    <th class="text-center">Resources</th>
+                                                    <th class="text-end">Storage</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDeptDistribution">
+                                                <tr><td colspan="4" class="text-center py-3 text-muted">Loading department metrics...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                                <div class="card-header bg-white py-3 border-0">
+                                    <h5 class="fw-bold mb-0">Category Breakdown</h5>
+                                    <small class="text-muted">Resource allocation across academic categories.</small>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Category</th>
+                                                    <th class="text-end">Resource Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblCategoryDistribution">
+                                                <tr><td colspan="2" class="text-center py-3 text-muted">Loading categories...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-header bg-white py-3 border-0">
+                                    <h5 class="fw-bold mb-0">Semester Allocation</h5>
+                                    <small class="text-muted">Resources mapped across academic semesters.</small>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Semester</th>
+                                                    <th class="text-end">Resource Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblSemesterDistribution">
+                                                <tr><td colspan="2" class="text-center py-3 text-muted">Loading semesters...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Activity Report -->
+                    <div class="card border-0 shadow-sm rounded-3 mb-4">
+                        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="fw-bold mb-0">Top Search Queries</h5>
+                                <small class="text-muted">Actual query frequencies extracted from historical search logs.</small>
+                            </div>
+                            <span class="badge bg-secondary" id="badgeUniqueQueries">Unique Queries: -</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Search Query Phrase</th>
+                                            <th class="text-end">Frequency Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblSearchActivity">
+                                        <tr><td colspan="3" class="text-center py-3 text-muted">Loading search analytics...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 2: USER GOVERNANCE -->
+                <div class="tab-pane fade" id="usersPane" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <h5 class="fw-bold mb-0">Registered User Accounts</h5>
+                                <small class="text-muted">Manage roles, grant permissions, and activate/deactivate accounts.</small>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" id="btnRefreshUsers">🔄 Refresh Users</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Name</th>
+                                            <th>Email Address</th>
+                                            <th>Role</th>
+                                            <th>Department</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblUsers">
+                                        <tr><td colspan="7" class="text-center py-4 text-muted">Loading user accounts...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small" id="usersPaginationInfo">Showing users...</span>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" id="btnPrevUsers" disabled>Previous</button>
+                                <button class="btn btn-outline-secondary" id="btnNextUsers" disabled>Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: AUDIT LOGS -->
+                <div class="tab-pane fade" id="auditPane" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold mb-1">Security Audit Trail</h5>
+                            <small class="text-muted">Immutable administrative audit log of sensitive system operations.</small>
+
+                            <!-- Filter Controls -->
+                            <form id="auditFilterForm" class="row g-2 mt-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">Action Name</label>
+                                    <input type="text" class="form-control form-control-sm" id="filterAuditAction" placeholder="e.g. USER, RESOURCE">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted mb-1">Status</label>
+                                    <select class="form-select form-select-sm" id="filterAuditStatus">
+                                        <option value="">All Statuses</option>
+                                        <option value="SUCCESS">SUCCESS</option>
+                                        <option value="FAILED">FAILED</option>
+                                        <option value="DENIED">DENIED</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">From Date/Time</label>
+                                    <input type="datetime-local" class="form-control form-control-sm" id="filterAuditFrom">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">To Date/Time</label>
+                                    <input type="datetime-local" class="form-control form-control-sm" id="filterAuditTo">
+                                </div>
+                                <div class="col-md-1 d-flex gap-1">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnResetAuditFilter">Reset</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>User Email</th>
+                                            <th>Action</th>
+                                            <th>Resource Type / ID</th>
+                                            <th>IP Address</th>
+                                            <th>Status</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblAuditLogs">
+                                        <tr><td colspan="7" class="text-center py-4 text-muted">Loading audit records...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small" id="auditPaginationInfo">Showing audit records...</span>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" id="btnPrevAudit" disabled>Previous</button>
+                                <button class="btn btn-outline-secondary" id="btnNextAudit" disabled>Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Change User Role -->
+    <div class="modal fade" id="modalChangeRole" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Modify User Role</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted mb-3">Reassigning a user's role alters their authorization across the entire portal immediately.</p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Target User</label>
+                        <input type="text" class="form-control form-control-sm bg-light" id="roleModalUserEmail" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select New Role</label>
+                        <select class="form-select form-select-sm" id="roleModalSelect">
+                            <option value="STUDENT">STUDENT (Read-only search & download)</option>
+                            <option value="FACULTY">FACULTY (Resource upload, attendance, file organization)</option>
+                            <option value="ADMIN">ADMIN (Full governance, master data, audits)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSaveUserRole">Update Role</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Confirm Status Change -->
+    <div class="modal fade" id="modalConfirmStatus" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="confirmStatusTitle">Confirm Account Status Change</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmStatusMessage">Are you sure you want to alter the active status of this user account?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnExecuteStatusChange">Confirm Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+    <!-- Admin Client Logic -->
+    <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+# ==============================================================================
+# AI-Based College Resource Finder — Application Configuration
+# Environment-based settings without hardcoded credentials.
+# ==============================================================================
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+        name: JSESSIONID
+      timeout: 30m
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: college-resource-finder
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:college_resource_finder}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 3
+      idle-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:false}
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: classpath:db/migration
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:true}
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+app:
+  storage:
+    upload-dir: ${STORAGE_DIR:../storage}
+    allowed-extensions: ${ALLOWED_EXTENSIONS:pdf,docx,pptx,txt,xlsx,csv}
+    max-file-size-mb: ${MAX_FILE_SIZE_MB:50}
+  ai:
+    enabled: ${AI_ENABLED:true}
+    service-url: ${AI_SERVICE_URL:http://127.0.0.1:8000}
+    timeout-ms: ${AI_TIMEOUT_MS:3000}
+    max-input-chars: ${AI_MAX_INPUT_CHARS:50000}
+    rate-limit-per-minute: ${AI_RATE_LIMIT_PER_MINUTE:30}
+    prefer-local: ${AI_PREFER_LOCAL:true}
+
+logging:
+  level:
+    root: INFO
+    com.college.resourcefinder: DEBUG
+    org.flywaydb: INFO

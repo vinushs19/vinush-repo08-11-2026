@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Attendance — College Resource Finder</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YcnS/NPWKapLI5e0A5eLmVkLf0jm0RMEZ9z" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .att-hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 2.5rem 0 2rem 0;
+            border-radius: 0 0 1.25rem 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.04em;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        .origin-badge {
+            font-size: 0.7rem;
+            padding: 0.2em 0.5em;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <span style="font-size: 1.4rem;">🎓</span>
+                <span>College Resource Finder</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/master-data.html">Academic Master Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/resources.html">Academic Resources</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/search.html">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/attendance.html">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin.html">Admin</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2" id="navAuthContainer">
+                    <a href="/login.html" class="btn btn-outline-light btn-sm">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <header class="att-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h2 class="fw-bold mb-1">📋 Staff Attendance Management & Calculations</h2>
+                    <p class="mb-0 text-white-50">
+                        Authorized data entry, batch imports with origin tracking, and deterministic attendance percentage metrics.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0" id="headerActionButtons">
+                    <button class="btn btn-light btn-sm fw-semibold me-2" data-bs-toggle="modal" data-bs-target="#recordModal">
+                        ➕ Record Attendance
+                    </button>
+                    <button class="btn btn-outline-light btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#importModal">
+                        📥 Batch Import
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mb-5">
+
+        <!-- Alert Notification -->
+        <div id="alertBox"></div>
+
+        <!-- Student Access Warning (Shown only if logged in as student) -->
+        <div id="studentAccessNotice" class="alert alert-warning" style="display: none;">
+            <h5 class="fw-bold mb-1">🔒 Confidential Records Notice</h5>
+            <p class="mb-0 small">
+                Staff attendance records and administrative rosters are confidential and restricted to authorized faculty and administrators.
+            </p>
+        </div>
+
+        <!-- Main Content Area (Staff & Admin) -->
+        <div id="staffContentArea">
+
+            <!-- Calculation / Summary Section -->
+            <div class="card border mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">📊 Attendance Percentage Calculator</h5>
+                    <span class="badge bg-primary">Deterministic (Sessions Attended / Applicable × 100)</span>
+                </div>
+                <div class="card-body">
+                    <form id="summaryForm" class="row g-3 align-items-end mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Staff Identifier <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm" id="calcStaffId"
+                                   placeholder="e.g. STF-MCA-001" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">From Date</label>
+                            <input type="date" class="form-control form-control-sm" id="calcStartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">To Date</label>
+                            <input type="date" class="form-control form-control-sm" id="calcEndDate">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100" id="btnCalculate">
+                                Calculate
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Summary Result Container -->
+                    <div id="summaryResult" style="display: none;">
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-label">Total Applicable Sessions</div>
+                                    <div class="stat-value" id="resTotalSessions">0</div>
+                                    <small class="text-muted">Scheduled duty periods</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-label">Sessions Attended</div>
+                                    <div class="stat-value text-success" id="resAttendedSessions">0</div>
+                                    <small class="text-muted">Present + On-Duty</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-label">Attendance Percentage</div>
+                                    <div class="stat-value text-primary" id="resPercentage">0.00%</div>
+                                    <div class="progress mt-1" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" id="resProgressBar" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card">
+                                    <div class="stat-label">Session Breakdown</div>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        <span class="badge bg-success" id="pillPresent">Present: 0</span>
+                                        <span class="badge bg-info text-dark" id="pillOnDuty">OD: 0</span>
+                                        <span class="badge bg-danger" id="pillAbsent">Absent: 0</span>
+                                        <span class="badge bg-warning text-dark" id="pillLeave">Leave: 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Section -->
+            <div class="card border mb-4">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="fw-bold mb-0">🔍 Search Attendance Records</h5>
+                </div>
+                <div class="card-body">
+                    <form id="searchFilterForm" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Staff ID</label>
+                            <input type="text" class="form-control form-control-sm" id="filterStaffId"
+                                   placeholder="Filter by Staff ID">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Department</label>
+                            <select class="form-select form-select-sm" id="filterDepartment">
+                                <option value="">All Departments</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">From Date</label>
+                            <input type="date" class="form-control form-control-sm" id="filterStartDate">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">To Date</label>
+                            <input type="date" class="form-control form-control-sm" id="filterEndDate">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold">Status</label>
+                            <select class="form-select form-select-sm" id="filterStatus">
+                                <option value="">All Statuses</option>
+                                <option value="PRESENT">PRESENT</option>
+                                <option value="ON_DUTY">ON_DUTY</option>
+                                <option value="ABSENT">ABSENT</option>
+                                <option value="LEAVE">LEAVE</option>
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnResetFilters">Reset</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Search Records</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Attendance Records Table -->
+            <div class="table-card">
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Attendance Roster</h6>
+                    <span class="badge bg-secondary" id="totalRecordsBadge">0 records</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th>Date</th>
+                                <th>Period</th>
+                                <th>Staff ID</th>
+                                <th>Staff Name</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Data Source</th>
+                                <th>Recorded By</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center py-4 text-muted">
+                                    Loading attendance records...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="p-3 border-top d-flex justify-content-between align-items-center small" id="paginationContainer">
+                    <span class="text-muted" id="pageInfo">Showing page 1 of 1</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0" id="paginationNav"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Record Single Attendance -->
+    <div class="modal fade" id="recordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="recordForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Record Staff Attendance</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Staff Identifier <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" id="recStaffId"
+                                       placeholder="e.g. STF-MCA-001" required maxlength="50">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Staff Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" id="recStaffName"
+                                       placeholder="Staff Name" required maxlength="150">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Department <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="recDeptId" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Attendance Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control form-control-sm" id="recDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Session Period <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control form-control-sm" id="recPeriod"
+                                       min="1" max="8" value="1" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Status <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="recStatus" required>
+                                    <option value="PRESENT">PRESENT</option>
+                                    <option value="ON_DUTY">ON_DUTY</option>
+                                    <option value="ABSENT">ABSENT</option>
+                                    <option value="LEAVE">LEAVE</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Data Origin</label>
+                                <select class="form-select form-select-sm" id="recOrigin">
+                                    <option value="MANUAL_ENTRY">MANUAL_ENTRY</option>
+                                    <option value="CSV_IMPORT">CSV_IMPORT</option>
+                                    <option value="BIOMETRIC_SYNC">BIOMETRIC_SYNC</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Remarks</label>
+                                <input type="text" class="form-control form-control-sm" id="recRemarks"
+                                       placeholder="Optional notes (e.g. On-duty faculty meeting)" maxlength="255">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="btnSaveRecord">Save Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Batch Import Attendance -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="importForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Batch Import Staff Attendance</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted mb-2">
+                            Enter CSV lines formatted as:
+                            <code>staffIdentifier, staffName, departmentId, attendanceDate (YYYY-MM-DD), sessionPeriod (1-8), status (PRESENT/ON_DUTY/ABSENT/LEAVE), remarks</code>
+                        </p>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Data Origin Label</label>
+                            <select class="form-select form-select-sm" id="importOrigin">
+                                <option value="CSV_IMPORT">CSV_IMPORT</option>
+                                <option value="BIOMETRIC_SYNC">BIOMETRIC_SYNC</option>
+                                <option value="MANUAL_ENTRY">MANUAL_ENTRY</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Attendance Records Data</label>
+                            <textarea class="form-control font-monospace small" id="importData" rows="7"
+                                      placeholder="STF-MCA-001, Dr. S. Raman, 1, 2026-10-24, 1, PRESENT, Regular session&#10;STF-MCA-001, Dr. S. Raman, 1, 2026-10-24, 2, PRESENT, Regular session&#10;STF-MCA-002, Prof. K. Priya, 1, 2026-10-24, 1, ON_DUTY, Seminar duty" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitImport">Process Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/attendance.js"></script>
+</body>
+</html>
