@@ -43,6 +43,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
     private final AuditLogRepository auditLogRepository;
+    private final AuditLoggingService auditLoggingService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
@@ -54,19 +55,21 @@ public class AuthService {
     public AuthService(UserRepository userRepository,
                        DepartmentRepository departmentRepository,
                        AuditLogRepository auditLogRepository,
+                       AuditLoggingService auditLoggingService,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
         this.auditLogRepository = auditLogRepository;
+        this.auditLoggingService = auditLoggingService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
     }
 
     /**
      * Authenticates user credentials, binds session to SecurityContext, and writes an audit record.
+     * Not annotated with @Transactional so that security failure audits persist and are not rolled back.
      */
-    @Transactional
     public UserProfileResponse authenticate(LoginRequest loginRequest,
                                            HttpServletRequest request,
                                            HttpServletResponse response) {
@@ -143,8 +146,9 @@ public class AuthService {
 
     /**
      * Updates display name, department, or rotates password for the authenticated user.
+     * Preserves audit log on invalid current password by avoiding rollback on validation exceptions.
      */
-    @Transactional
+    @Transactional(noRollbackFor = {IllegalArgumentException.class, BadCredentialsException.class})
     public UserProfileResponse updateCurrentUserProfile(ProfileUpdateRequest updateRequest,
                                                         HttpServletRequest request) {
         User user = getCurrentAuthenticatedUser();
@@ -190,6 +194,19 @@ public class AuthService {
         String email = auth.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+    }
+
+    /**
+     * Helper to obtain the entity of the authenticated user from the SecurityContext,
+     * or null if the user is unauthenticated or anonymous.
+     */
+    public User getCurrentUserOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return null;
+        }
+        String email = auth.getName();
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     private void logAudit(User user, String action, String status, HttpServletRequest request, String details) {

@@ -28,20 +28,20 @@ class TestAiService(unittest.TestCase):
         res = parse_natural_language_query("Find DBMS notes for Unit 3", "MCA", use_llm=False)
         self.assertEqual(res["subject"], "DBMS")
         self.assertEqual(res["unit"], 3)
-        self.assertEqual(res["category"], "Lecture Notes")
+        self.assertEqual(res["category"], "Notes")
         self.assertGreaterEqual(res["confidence"], 0.6)
 
     def test_query_parsing_java_sem2_question_papers(self):
         res = parse_natural_language_query("Show Java question papers for Semester 2", "MCA", use_llm=False)
         self.assertEqual(res["subject"], "Java")
         self.assertEqual(res["semester"], 2)
-        self.assertEqual(res["category"], "Previous Examination Papers")
+        self.assertEqual(res["category"], "Question Papers")
 
     def test_query_parsing_my_department(self):
         res = parse_natural_language_query("Show study materials for my department", "MCA", use_llm=False)
         self.assertTrue(res["department_scoped"])
         self.assertEqual(res["department"], "MCA")
-        self.assertEqual(res["category"], "Study Materials")
+        self.assertEqual(res["category"], "Notes")
 
     @patch("nlp_parser.query_ollama_json")
     def test_hybrid_parsing_with_mock_llm_valid(self, mock_ollama):
@@ -49,7 +49,7 @@ class TestAiService(unittest.TestCase):
             "subject": "Cloud Computing",
             "semester": 3,
             "unit": 1,
-            "category": "Lecture Notes",
+            "category": "Notes",
             "department": "CS",
             "keywords": "virtualization"
         }
@@ -57,7 +57,7 @@ class TestAiService(unittest.TestCase):
         self.assertEqual(res["subject"], "Cloud Computing")
         self.assertEqual(res["semester"], 3)
         self.assertEqual(res["unit"], 1)
-        self.assertEqual(res["category"], "Lecture Notes")
+        self.assertEqual(res["category"], "Notes")
         self.assertEqual(res["source"], "hybrid_qwen3")
 
     @patch("nlp_parser.query_ollama_json")

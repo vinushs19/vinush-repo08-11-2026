@@ -273,6 +273,17 @@ public class AiService {
             throw new ResourceNotFoundException("The underlying physical file is not available on the server: " + resource.getFileName());
         }
 
+        String fileName = resource.getFileName() != null ? resource.getFileName().toLowerCase() : "";
+        String fileType = resource.getFileType() != null ? resource.getFileType().toLowerCase() : "";
+        boolean isSupported = fileName.endsWith(".pdf") || fileName.endsWith(".docx") || fileName.endsWith(".txt")
+                || "pdf".equals(fileType) || "docx".equals(fileType) || "txt".equals(fileType);
+        if (!isSupported) {
+            throw new IllegalArgumentException(
+                    "Text summarization is currently supported only for PDF, DOCX, and TXT documents. " +
+                    "Presentation and spreadsheet files (.pptx, .xlsx) are not supported."
+            );
+        }
+
         // Cache verification: if summary exists and file has not been modified
         if (resource.getSummary() != null && !resource.getSummary().isBlank() && resource.getFileHash() != null) {
             AiSummarizeResponse cachedResp = new AiSummarizeResponse();
@@ -301,11 +312,20 @@ public class AiService {
         summaryResp.setGeneratedAt(LocalDateTime.now());
         summaryResp.setCached(false);
 
-        // Persist summary and hash in database
-        resource.setSummary(summaryResp.getSummary());
-        resource.setSummaryUpdatedAt(summaryResp.getGeneratedAt());
-        resource.setFileHash(summaryResp.getFileHash());
-        resourceRepository.save(resource);
+        // Only persist and cache valid generated summaries (never cache fallback messages or errors)
+        boolean shouldPersist = summaryResp.getMethod() != null
+                && !summaryResp.getMethod().startsWith("fallback")
+                && !"unsupported_format".equals(summaryResp.getMethod())
+                && summaryResp.getFileHash() != null
+                && summaryResp.getSummary() != null
+                && !summaryResp.getSummary().contains("requires the active AI");
+
+        if (shouldPersist) {
+            resource.setSummary(summaryResp.getSummary());
+            resource.setSummaryUpdatedAt(summaryResp.getGeneratedAt());
+            resource.setFileHash(summaryResp.getFileHash());
+            resourceRepository.save(resource);
+        }
 
         logAudit(currentUser, "RESOURCE_SUMMARIZE", "SUCCESS", httpRequest,
                 "Generated " + summaryResp.getMethod() + " summary for resource #" + resourceId +

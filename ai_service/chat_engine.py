@@ -53,7 +53,7 @@ FEW_SHOT_CHAT_EXAMPLES = [
     },
     {
         "role": "assistant",
-        "content": '{"reply": "Searching repository for DBMS Unit 3 Lecture Notes...", "action_type": "SEARCH_RESOURCES", "action_data": {"keywords": "DBMS", "unit": 3, "category": "Lecture Notes"}}'
+        "content": '{"reply": "Searching repository for DBMS Unit 3 Notes...", "action_type": "SEARCH_RESOURCES", "action_data": {"keywords": "DBMS", "unit": 3, "category": "Notes"}}'
     },
     {
         "role": "user",

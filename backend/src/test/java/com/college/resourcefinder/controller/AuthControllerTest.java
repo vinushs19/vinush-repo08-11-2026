@@ -41,6 +41,9 @@ class AuthControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private com.college.resourcefinder.repository.AuditLogRepository auditLogRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -81,7 +84,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/auth/login - invalid password should return 401 Unauthorized safely")
+    @DisplayName("POST /api/v1/auth/login - invalid password should return 401 Unauthorized safely and record audit log")
     void shouldRejectInvalidPassword() throws Exception {
         LoginRequest loginRequest = new LoginRequest("test.student@college.edu", "WrongPassword!");
 
@@ -92,6 +95,10 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success", is(false)))
                 .andExpect(jsonPath("$.error", is("UNAUTHORIZED")))
                 .andExpect(jsonPath("$.message", containsString("Invalid email address or password")));
+
+        boolean hasFailureAudit = auditLogRepository.findAll().stream()
+                .anyMatch(l -> "LOGIN".equals(l.getAction()) && "FAILURE".equals(l.getStatus()));
+        assertTrue(hasFailureAudit, "Failed login must be recorded in audit log despite exception rollback");
     }
 
     @Test

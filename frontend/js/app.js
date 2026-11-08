@@ -60,12 +60,26 @@ async function checkAuthStatus() {
 }
 
 /**
+ * Retrieves the XSRF-TOKEN cookie value for CSRF protection.
+ */
+function getCsrfToken() {
+    const match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : '';
+}
+
+/**
  * Executes secure logout via POST /api/v1/auth/logout
  */
 async function handleLogout() {
     try {
+        const csrfToken = getCsrfToken();
+        const headers = { "Content-Type": "application/json" };
+        if (csrfToken) {
+            headers["X-XSRF-TOKEN"] = csrfToken;
+        }
         await fetch("/api/v1/auth/logout", {
             method: "POST",
+            headers: headers,
             credentials: "include"
         });
     } catch {

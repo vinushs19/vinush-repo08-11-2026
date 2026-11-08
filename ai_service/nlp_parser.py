@@ -16,12 +16,13 @@ STOPWORDS = {
 }
 
 ALLOWED_CATEGORIES = [
-    "Lecture Notes",
-    "Previous Examination Papers",
+    "Notes",
+    "Question Papers",
     "Assignments",
-    "Study Materials",
-    "E-books and Reference Documents",
-    "Other Approved Academic Resources"
+    "E-Books",
+    "Lab Manuals",
+    "Syllabus",
+    "Others"
 ]
 
 VALID_DEPARTMENTS = {"MCA", "CS", "IT", "BCA", "BSC_CS", "MCA_AI"}
@@ -30,10 +31,12 @@ SUBJECT_SYNONYMS = {
     "dbms": "DBMS",
     "database": "DBMS",
     "database management system": "DBMS",
+    "database management systems": "DBMS",
     "database management": "DBMS",
     "java": "Java",
     "core java": "Java",
     "advanced java": "Java",
+    "java enterprise applications": "Java",
     "os": "Operating Systems",
     "operating system": "Operating Systems",
     "operating systems": "Operating Systems",
@@ -41,8 +44,10 @@ SUBJECT_SYNONYMS = {
     "network": "Computer Networks",
     "computer networks": "Computer Networks",
     "ds": "Data Structures",
+    "dsa": "Data Structures",
     "data structure": "Data Structures",
     "data structures": "Data Structures",
+    "data structures and algorithms": "Data Structures",
     "python": "Python",
     "python programming": "Python",
     "web tech": "Web Technologies",
@@ -54,35 +59,41 @@ SUBJECT_SYNONYMS = {
 }
 
 CATEGORY_SYNONYMS = {
-    "notes": "Lecture Notes",
-    "lecture notes": "Lecture Notes",
-    "lecture": "Lecture Notes",
-    "slides": "Lecture Notes",
-    "ppt": "Lecture Notes",
-    "question paper": "Previous Examination Papers",
-    "question papers": "Previous Examination Papers",
-    "questions": "Previous Examination Papers",
-    "exam paper": "Previous Examination Papers",
-    "exam papers": "Previous Examination Papers",
-    "previous paper": "Previous Examination Papers",
-    "model paper": "Previous Examination Papers",
+    "notes": "Notes",
+    "lecture notes": "Notes",
+    "lecture": "Notes",
+    "slides": "Notes",
+    "ppt": "Notes",
+    "presentation": "Notes",
+    "question paper": "Question Papers",
+    "question papers": "Question Papers",
+    "questions": "Question Papers",
+    "exam paper": "Question Papers",
+    "exam papers": "Question Papers",
+    "previous paper": "Question Papers",
+    "model paper": "Question Papers",
+    "qp": "Question Papers",
+    "pyq": "Question Papers",
     "assignment": "Assignments",
     "assignments": "Assignments",
     "homework": "Assignments",
-    "lab": "Study Materials",
-    "lab manual": "Study Materials",
-    "practical": "Study Materials",
-    "manual": "Study Materials",
-    "study material": "Study Materials",
-    "study materials": "Study Materials",
-    "material": "Study Materials",
-    "materials": "Study Materials",
-    "book": "E-books and Reference Documents",
-    "books": "E-books and Reference Documents",
-    "ebook": "E-books and Reference Documents",
-    "ebooks": "E-books and Reference Documents",
-    "e-book": "E-books and Reference Documents",
-    "e-books": "E-books and Reference Documents",
+    "lab": "Lab Manuals",
+    "lab manual": "Lab Manuals",
+    "practical": "Lab Manuals",
+    "manual": "Lab Manuals",
+    "study material": "Notes",
+    "study materials": "Notes",
+    "material": "Notes",
+    "materials": "Notes",
+    "book": "E-Books",
+    "books": "E-Books",
+    "ebook": "E-Books",
+    "ebooks": "E-Books",
+    "e-book": "E-Books",
+    "e-books": "E-Books",
+    "syllabus": "Syllabus",
+    "curriculum": "Syllabus"
+}
     "reference": "E-books and Reference Documents",
     "syllabus": "Other Approved Academic Resources",
     "curriculum": "Other Approved Academic Resources"
@@ -107,7 +118,7 @@ FEW_SHOT_QUERY_EXAMPLES = [
     },
     {
         "role": "assistant",
-        "content": '{"subject": "DBMS", "semester": null, "unit": 3, "category": "Lecture Notes", "department": null, "keywords": ""}'
+        "content": '{"subject": "DBMS", "semester": null, "unit": 3, "category": "Notes", "department": null, "keywords": ""}'
     },
     {
         "role": "user",
@@ -115,7 +126,7 @@ FEW_SHOT_QUERY_EXAMPLES = [
     },
     {
         "role": "assistant",
-        "content": '{"subject": "Java", "semester": 2, "unit": null, "category": "Previous Examination Papers", "department": "MCA", "keywords": ""}'
+        "content": '{"subject": "Java", "semester": 2, "unit": null, "category": "Question Papers", "department": "MCA", "keywords": ""}'
     },
     {
         "role": "user",

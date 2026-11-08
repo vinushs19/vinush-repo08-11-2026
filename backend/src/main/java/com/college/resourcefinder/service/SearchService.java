@@ -33,6 +33,18 @@ public class SearchService {
             "all", "about", "and", "or", "from"
     );
 
+    private static final Map<String, List<String>> SUBJECT_SYNONYMS = Map.of(
+            "dbms", List.of("dbms", "database", "database management", "database management systems", "26mca201"),
+            "database", List.of("dbms", "database", "database management", "database management systems", "26mca201"),
+            "java", List.of("java", "java enterprise", "java enterprise applications", "26mca301"),
+            "dsa", List.of("dsa", "data structures", "data structures and algorithms", "26mca101"),
+            "data structures", List.of("dsa", "data structures", "data structures and algorithms", "26mca101"),
+            "os", List.of("os", "operating system", "operating systems"),
+            "operating system", List.of("os", "operating system", "operating systems"),
+            "cn", List.of("cn", "computer networks", "network", "networks"),
+            "cloud", List.of("cloud", "cloud computing")
+    );
+
     private final ResourceRepository resourceRepository;
     private final SearchHistoryRepository searchHistoryRepository;
     private final SubjectRepository subjectRepository;
@@ -109,10 +121,15 @@ public class SearchService {
             if (targetSubjectId != null) {
                 predicates.add(cb.equal(root.get("subject").get("subjectId"), targetSubjectId));
             } else if (subjectToken != null && !subjectToken.isBlank()) {
-                String subPattern = "%" + subjectToken.toLowerCase() + "%";
-                Predicate subjCodeMatch = cb.like(cb.lower(root.get("subject").get("subjectCode")), subPattern);
-                Predicate subjNameMatch = cb.like(cb.lower(root.get("subject").get("subjectName")), subPattern);
-                predicates.add(cb.or(subjCodeMatch, subjNameMatch));
+                String key = subjectToken.trim().toLowerCase();
+                List<String> synonyms = SUBJECT_SYNONYMS.getOrDefault(key, List.of(key));
+                List<Predicate> subjPreds = new ArrayList<>();
+                for (String syn : synonyms) {
+                    String subPattern = "%" + syn + "%";
+                    subjPreds.add(cb.like(cb.lower(root.get("subject").get("subjectCode")), subPattern));
+                    subjPreds.add(cb.like(cb.lower(root.get("subject").get("subjectName")), subPattern));
+                }
+                predicates.add(cb.or(subjPreds.toArray(new Predicate[0])));
             }
 
             if (targetUnitId != null) {
@@ -123,12 +140,19 @@ public class SearchService {
 
             if (targetCategoryId != null) {
                 predicates.add(cb.equal(root.get("category").get("categoryId"), targetCategoryId));
-            } else if (detected.getExtractedCategory() != null) {
-                predicates.add(cb.like(cb.lower(root.get("category").get("categoryName")), "%" + detected.getExtractedCategory().toLowerCase() + "%"));
-            }
-
-            if (targetResourceType != null && !targetResourceType.isBlank()) {
-                predicates.add(cb.like(cb.lower(root.get("resourceType")), "%" + targetResourceType.toLowerCase() + "%"));
+            } else {
+                String catName = detected.getExtractedCategory();
+                List<Predicate> catOrTypePreds = new ArrayList<>();
+                if (catName != null && !catName.isBlank()) {
+                    catOrTypePreds.add(cb.like(cb.lower(root.get("category").get("categoryName")), "%" + catName.toLowerCase() + "%"));
+                }
+                if (targetResourceType != null && !targetResourceType.isBlank()) {
+                    catOrTypePreds.add(cb.like(cb.lower(root.get("resourceType")), "%" + targetResourceType.toLowerCase() + "%"));
+                    catOrTypePreds.add(cb.like(cb.lower(root.get("category").get("categoryName")), "%" + targetResourceType.toLowerCase() + "%"));
+                }
+                if (!catOrTypePreds.isEmpty()) {
+                    predicates.add(cb.or(catOrTypePreds.toArray(new Predicate[0])));
+                }
             }
 
             if (targetFileType != null && !targetFileType.isBlank()) {
@@ -197,27 +221,35 @@ public class SearchService {
             working = unitMatcher.replaceFirst(" ");
         }
 
-        // 3. Category & Resource Type extraction
+        // 3. Category & Resource Type extraction (aligned with database seeded categories)
         if (working.matches(".*\\b(notes|lecture notes|slides|ppt|presentation)\\b.*")) {
-            dto.setExtractedCategory("Lecture Notes");
-            dto.setExtractedResourceType("Lecture notes");
+            dto.setExtractedCategory("Notes");
+            dto.setExtractedResourceType("Notes");
             working = working.replaceAll("\\b(lecture notes|notes|slides|ppt|presentation)\\b", " ");
         } else if (working.matches(".*\\b(question papers?|qp|pyq|exams?|model papers?|question bank)\\b.*")) {
             dto.setExtractedCategory("Question Papers");
-            dto.setExtractedResourceType("Previous examination papers");
+            dto.setExtractedResourceType("Question Papers");
             working = working.replaceAll("\\b(question papers?|qp|pyq|exams?|model papers?|question bank)\\b", " ");
         } else if (working.matches(".*\\b(assignments?|homework|lab exercises?)\\b.*")) {
             dto.setExtractedCategory("Assignments");
             dto.setExtractedResourceType("Assignments");
             working = working.replaceAll("\\b(assignments?|homework|lab exercises?)\\b", " ");
+        } else if (working.matches(".*\\b(lab manuals?|lab manual)\\b.*")) {
+            dto.setExtractedCategory("Lab Manuals");
+            dto.setExtractedResourceType("Lab Manuals");
+            working = working.replaceAll("\\b(lab manuals?|lab manual)\\b", " ");
         } else if (working.matches(".*\\b(study materials?|handbook|guide)\\b.*")) {
-            dto.setExtractedCategory("Study Material");
-            dto.setExtractedResourceType("Study materials");
+            dto.setExtractedCategory("Notes");
+            dto.setExtractedResourceType("Notes");
             working = working.replaceAll("\\b(study materials?|handbook|guide)\\b", " ");
         } else if (working.matches(".*\\b(books?|e-?books?|textbooks?)\\b.*")) {
             dto.setExtractedCategory("E-Books");
-            dto.setExtractedResourceType("E-books and reference documents");
+            dto.setExtractedResourceType("E-Books");
             working = working.replaceAll("\\b(books?|e-?books?|textbooks?)\\b", " ");
+        } else if (working.matches(".*\\b(syllabus|curriculum)\\b.*")) {
+            dto.setExtractedCategory("Syllabus");
+            dto.setExtractedResourceType("Syllabus");
+            working = working.replaceAll("\\b(syllabus|curriculum)\\b", " ");
         }
 
         // 4. Department scope extraction: "my department"

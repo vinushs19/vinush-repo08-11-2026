@@ -45,24 +45,25 @@ public class FallbackLocalAiService implements AiServiceClient {
     );
 
     private static final Map<String, String> CATEGORY_ALIASES = Map.ofEntries(
-            Map.entry("notes", "Lecture Notes"),
-            Map.entry("lecture notes", "Lecture Notes"),
-            Map.entry("question paper", "Previous Examination Papers"),
-            Map.entry("question papers", "Previous Examination Papers"),
-            Map.entry("questions", "Previous Examination Papers"),
-            Map.entry("exam paper", "Previous Examination Papers"),
+            Map.entry("notes", "Notes"),
+            Map.entry("lecture notes", "Notes"),
+            Map.entry("question paper", "Question Papers"),
+            Map.entry("question papers", "Question Papers"),
+            Map.entry("questions", "Question Papers"),
+            Map.entry("exam paper", "Question Papers"),
             Map.entry("assignments", "Assignments"),
             Map.entry("assignment", "Assignments"),
             Map.entry("homework", "Assignments"),
-            Map.entry("study materials", "Study Materials"),
-            Map.entry("study material", "Study Materials"),
-            Map.entry("material", "Study Materials"),
-            Map.entry("materials", "Study Materials"),
-            Map.entry("lab manual", "Study Materials"),
-            Map.entry("book", "E-books and Reference Documents"),
-            Map.entry("books", "E-books and Reference Documents"),
-            Map.entry("ebook", "E-books and Reference Documents"),
-            Map.entry("syllabus", "Other Approved Academic Resources")
+            Map.entry("study materials", "Notes"),
+            Map.entry("study material", "Notes"),
+            Map.entry("material", "Notes"),
+            Map.entry("materials", "Notes"),
+            Map.entry("lab manual", "Lab Manuals"),
+            Map.entry("lab", "Lab Manuals"),
+            Map.entry("book", "E-Books"),
+            Map.entry("books", "E-Books"),
+            Map.entry("ebook", "E-Books"),
+            Map.entry("syllabus", "Syllabus")
     );
 
     private static final List<String> PROMPT_INJECTION_PATTERNS = List.of(
@@ -189,8 +190,30 @@ public class FallbackLocalAiService implements AiServiceClient {
         String fileHash = computeSha256(file);
         resp.setFileHash(fileHash);
         resp.setGeneratedAt(LocalDateTime.now());
-        resp.setMethod("local_java_extractive");
 
+        String name = file.getName().toLowerCase();
+        String ext = name.contains(".") ? name.substring(name.lastIndexOf(".")) : "";
+
+        if (!Set.of(".txt", ".pdf", ".docx").contains(ext)) {
+            resp.setSummary("Text summarization is not supported for " + (ext.isEmpty() ? "this" : ext.toUpperCase()) + " format. Supported formats: PDF, DOCX, TXT.");
+            resp.setMethod("unsupported_format");
+            resp.setWordCount(0);
+            resp.setOriginalWordCount(0);
+            resp.setReductionRatio(0.0);
+            return resp;
+        }
+
+        // For binary document formats (.pdf, .docx), do not read raw bytes as UTF-8
+        if (".pdf".equals(ext) || ".docx".equals(ext)) {
+            resp.setSummary("Text extraction for " + ext.toUpperCase() + " documents requires the active AI text extraction microservice.");
+            resp.setMethod("fallback_unavailable");
+            resp.setWordCount(0);
+            resp.setOriginalWordCount(0);
+            resp.setReductionRatio(0.0);
+            return resp;
+        }
+
+        resp.setMethod("local_java_extractive");
         String text = extractTextDefensively(file);
         int words = countWords(text);
         resp.setOriginalWordCount(words);
